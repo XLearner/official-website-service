@@ -1,69 +1,12 @@
 import utils, { baseUrl } from "../utils/index.js";
 import { Logger } from "../utils/logger.js";
 
-const TABLE_NAME1 = "img_repo";
-
-/**
- * 上传图片 并返回图片路径和文件名
- */
-async function UploadImg(ctx) {
-  if (ctx.file) {
-    const imgName = ctx.file.filename;
-    const imgurl = "/photo/" + ctx.file.filename;
-    const type = ctx.request.body.type || "banner";
-    const updateSt = `insert into ${TABLE_NAME1}(imgName, path, type) values("${imgName}", "${imgurl}", "${type}")`;
-    try {
-      const res = await utils.execGetRes(updateSt);
-
-      if (res.affectedRows > 0) {
-        ctx.body = utils.jsonback(
-          0,
-          {
-            imgName: ctx.file.filename,
-            imgurl: imgurl,
-          },
-          "存储成功"
-        );
-      } else {
-        ctx.body = utils.jsonback(-10000, null, "存储失败");
-      }
-    } catch (error) {
-      Logger(error);
-    }
-  }
-}
-
-/**
- * 请求数据库获取对应类型的图片
- */
-async function getImg(type) {
-  const updateSt = `select * from ${TABLE_NAME1} where type="${type}"`;
-  try {
-    const res = await utils.execGetRes(updateSt);
-
-    if (res.length > 0) {
-      return res;
-    }
-    return [];
-  } catch (error) {
-    Logger(error);
-  }
-}
-
-/**
- * 获取图片
- */
-async function GetImg(ctx) {
-  const type = ctx.request.body.type;
-  const imgList = await getImg(type);
-
-  ctx.body = utils.jsonback(0, imgList);
-}
+const TABLE_NAME1 = "banner";
 
 /**
  * 保存轮播图片
  */
-async function SaveBanner(ctx) {
+async function Add(ctx) {
   const { title, description, imgurl } = ctx.request.body;
 
   if (!title || !description || !imgurl) {
@@ -72,7 +15,7 @@ async function SaveBanner(ctx) {
   }
   const now = new Date();
   const date = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`;
-  const updateSt = `insert into banner(imgurl, title, description, date) values("${imgurl}", "${title}", "${description}", "${date}")`;
+  const updateSt = `insert into ${TABLE_NAME1}(imgurl, title, description, date) values("${imgurl}", "${title}", "${description}", "${date}")`;
   try {
     const res = await utils.execGetRes(updateSt);
     if (res.affectedRows > 0) {
@@ -88,8 +31,8 @@ async function SaveBanner(ctx) {
 /**
  * 获取轮播图片
  */
-async function GetBannerImg(ctx) {
-  const updateSt = `select * from banner`;
+async function Get(ctx) {
+  const updateSt = `select * from ${TABLE_NAME1}`;
   try {
     const res = await utils.execGetRes(updateSt);
 
@@ -108,14 +51,14 @@ async function GetBannerImg(ctx) {
   }
 }
 
-async function DeleteBanner(ctx) {
+async function Delete(ctx) {
   const id = ctx.request.body.id;
   if (!id) {
     ctx.body = utils.jsonback(-1, "", "待删除banner id为空");
     return;
   }
 
-  const updateSt = `delete from banner where id="${id}"`;
+  const updateSt = `delete from ${TABLE_NAME1} where id="${id}"`;
 
   try {
     const res = await utils.execGetRes(updateSt);
@@ -131,9 +74,7 @@ async function DeleteBanner(ctx) {
 }
 
 export default {
-  UploadImg,
-  GetImg,
-  SaveBanner,
-  GetBannerImg,
-  DeleteBanner,
+  Add,
+  Get,
+  Delete,
 };

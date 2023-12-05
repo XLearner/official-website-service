@@ -9,10 +9,10 @@ route.post("/v1/logout", controller.Logout);
 route.post("/v1/check", controller.Check);
 
 // 公司信息
-route.get("/v1/get/info", controller.Index);
-route.post("/v1/set/info", controller.SetInfo);
-route.post("/v1/add/info", controller.AddInfo);
-route.post("/v1/delete/info", controller.DeleteInfo);
+route.get("/v1/get/info", controller.baseInfoControl.Get);
+route.post("/v1/set/info", controller.baseInfoControl.Set);
+route.post("/v1/add/info", controller.baseInfoControl.Add);
+route.post("/v1/delete/info", controller.baseInfoControl.Delete);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -26,13 +26,17 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // 图片
-route.post("/v1/upload", upload.single("files"), controller.UploadImg);
-route.get("/v1/get/img", controller.GetImg);
+route.post(
+  "/v1/upload",
+  upload.single("files"),
+  controller.imageControl.Upload
+);
+route.get("/v1/get/img", controller.imageControl.GetImg);
 
 // 轮播图
-route.get("/v1/get/banner", controller.GetBannerImg);
-route.post("/v1/save/banner", controller.SaveBanner);
-route.post("/v1/delete/banner", controller.DeleteBanner);
+route.get("/v1/get/banner", controller.bannerControl.Get);
+route.post("/v1/save/banner", controller.bannerControl.Add);
+route.post("/v1/delete/banner", controller.bannerControl.Delete);
 
 // 亮点业务
 route.get("/v1/get/business", controller.businessControl.Search);

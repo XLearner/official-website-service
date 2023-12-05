@@ -6,7 +6,7 @@ export const baseUrl = "http://localhost:3000";
 function jsonback(code, data, msg) {
   return {
     code,
-    data: data ?? null,
+    data: data || null,
     msg: msg || "",
   };
 }

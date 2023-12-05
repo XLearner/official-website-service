@@ -1,4 +1,3 @@
-import webpack from "webpack";
 import path from "path";
 
 const filename = "service.js";
@@ -17,47 +16,54 @@ const config = {
     //   type: "this",
     // },
     // clean: true,
+    // libraryTarget: "commonjs2",
   },
   module: {
     rules: [
-      {
-        test: /\.js$/,
-        use: [
-          {
-            loader: "babel-loader",
-            // options: {
-            //   presets: [
-            //     [
-            //       "@babel/env",
-            //       {
-            //         useBuiltIns: "entry",
-            //         corejs: 3.29,
-            //       },
-            //     ],
-            //     "@babel/typescript",
-            //   ],
-            // },
-          },
-        ],
-      },
+      // {
+      //   test: /\.js$/,
+      //   use: [
+      //     {
+      //       loader: "babel-loader",
+      //       // options: {
+      //       //   presets: [
+      //       //     [
+      //       //       "@babel/env",
+      //       //       {
+      //       //         useBuiltIns: "entry",
+      //       //         corejs: 3.29,
+      //       //       },
+      //       //     ],
+      //       //     "@babel/typescript",
+      //       //   ],
+      //       // },
+      //     },
+      //   ],
+      // },
       {
         test: /\.mjs$/,
         include: /node_modules/,
         type: "javascript/auto",
+        use: {
+          loader: "babel-loader",
+        },
+        // resolve: {
+        //   fullySpecified: false,
+        // },
       },
     ],
   },
-  optimization: {
-    minimize: true,
-    minimizer: [
-      // new TerserPlugin({
-      //   terserOptions: {
-      //     compress: {},
-      //   },
-      //   extractComments: false,
-      // }),
-    ],
-  },
+  // optimization: {
+  //   minimize: true,
+  //   minimizer: [
+  //     // new TerserPlugin({
+  //     //   terserOptions: {
+  //     //     compress: {},
+  //     //   },
+  //     //   extractComments: false,
+  //     // }),
+  //   ],
+  // },
 };
 
 export default config;
