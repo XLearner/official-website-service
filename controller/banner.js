@@ -1,4 +1,5 @@
 import utils, { baseUrl } from "../utils/index.js";
+import { Logger } from "../utils/logger.js";
 
 const TABLE_NAME1 = "img_repo";
 
@@ -11,20 +12,23 @@ async function UploadImg(ctx) {
     const imgurl = "/photo/" + ctx.file.filename;
     const type = ctx.request.body.type || "banner";
     const updateSt = `insert into ${TABLE_NAME1}(imgName, path, type) values("${imgName}", "${imgurl}", "${type}")`;
+    try {
+      const res = await utils.execGetRes(updateSt);
 
-    const res = await utils.execGetRes(updateSt);
-
-    if (res.affectedRows > 0) {
-      ctx.body = utils.jsonback(
-        0,
-        {
-          imgName: ctx.file.filename,
-          imgurl: imgurl,
-        },
-        "存储成功"
-      );
-    } else {
-      ctx.body = utils.jsonback(-10000, null, "存储失败");
+      if (res.affectedRows > 0) {
+        ctx.body = utils.jsonback(
+          0,
+          {
+            imgName: ctx.file.filename,
+            imgurl: imgurl,
+          },
+          "存储成功"
+        );
+      } else {
+        ctx.body = utils.jsonback(-10000, null, "存储失败");
+      }
+    } catch (error) {
+      Logger(error);
     }
   }
 }
@@ -34,13 +38,16 @@ async function UploadImg(ctx) {
  */
 async function getImg(type) {
   const updateSt = `select * from ${TABLE_NAME1} where type="${type}"`;
+  try {
+    const res = await utils.execGetRes(updateSt);
 
-  const res = await utils.execGetRes(updateSt);
-
-  if (res.length > 0) {
-    return res;
+    if (res.length > 0) {
+      return res;
+    }
+    return [];
+  } catch (error) {
+    Logger(error);
   }
-  return [];
 }
 
 /**
@@ -66,12 +73,15 @@ async function SaveBanner(ctx) {
   const now = new Date();
   const date = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`;
   const updateSt = `insert into banner(imgurl, title, description, date) values("${imgurl}", "${title}", "${description}", "${date}")`;
-
-  const res = await utils.execGetRes(updateSt);
-  if (res.affectedRows > 0) {
-    ctx.body = utils.jsonback(0, "", "成功添加banner");
-  } else {
-    ctx.body = utils.jsonback(0, "", "添加banner失败");
+  try {
+    const res = await utils.execGetRes(updateSt);
+    if (res.affectedRows > 0) {
+      ctx.body = utils.jsonback(0, "", "成功添加banner");
+    } else {
+      ctx.body = utils.jsonback(0, "", "添加banner失败");
+    }
+  } catch (error) {
+    Logger(error);
   }
 }
 
@@ -80,17 +90,21 @@ async function SaveBanner(ctx) {
  */
 async function GetBannerImg(ctx) {
   const updateSt = `select * from banner`;
-  const res = await utils.execGetRes(updateSt);
+  try {
+    const res = await utils.execGetRes(updateSt);
 
-  if (res.length > 0) {
-    const imgList = res.map((ele) => ({
-      ...ele,
-      imgurl: `${baseUrl}${ele.imgurl}`,
-    }));
+    if (res.length > 0) {
+      const imgList = res.map((ele) => ({
+        ...ele,
+        imgurl: `${baseUrl}${ele.imgurl}`,
+      }));
 
-    ctx.body = utils.jsonback(0, imgList);
-  } else {
-    ctx.body = utils.jsonback(0, []);
+      ctx.body = utils.jsonback(0, imgList);
+    } else {
+      ctx.body = utils.jsonback(0, []);
+    }
+  } catch (error) {
+    Logger(error);
   }
 }
 
@@ -112,6 +126,7 @@ async function DeleteBanner(ctx) {
     }
   } catch (error) {
     ctx.body = utils.jsonback(-10000, error.toString(), "删除有误");
+    Logger(error);
   }
 }
 

@@ -1,3 +1,4 @@
+import { Logger } from "./logger.js";
 import connection from "./mysql.js";
 
 export const baseUrl = "http://localhost:3000";
@@ -36,6 +37,7 @@ function execQuery(connection, sentence) {
     connection.query(sentence, function (error, results, fields) {
       if (error) {
         console.log("error --- ", sentence);
+        Logger(error);
         return reject(error);
       }
       console.log(`The result of "${sentence}" is: `, results);

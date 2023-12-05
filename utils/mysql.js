@@ -1,4 +1,5 @@
 import mysql from "mysql";
+import { Logger } from "./logger.js";
 const remote = ["10.0.12.12", "yanli@1647"];
 const localhost = ["localhost", "yanli"];
 

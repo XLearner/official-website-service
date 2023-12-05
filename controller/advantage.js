@@ -1,20 +1,24 @@
 import utils, { baseUrl } from "../utils/index.js";
+import { Logger } from "../utils/logger.js";
 
 const TABLE_NAME = "advantage";
 
 async function Search(ctx) {
   const updateSt = `SELECT * from zh_office_website.${TABLE_NAME};`;
+  try {
+    const res = await utils.execGetRes(updateSt);
 
-  const res = await utils.execGetRes(updateSt);
-
-  if (res.length > 0) {
-    const imgList = res.map((ele) => ({
-      ...ele,
-      img: `${baseUrl}${ele.img}`,
-    }));
-    ctx.body = utils.jsonback(0, imgList, "");
-  } else {
-    ctx.body = utils.jsonback(0, null, "");
+    if (res.length > 0) {
+      const imgList = res.map((ele) => ({
+        ...ele,
+        img: `${baseUrl}${ele.img}`,
+      }));
+      ctx.body = utils.jsonback(0, imgList, "");
+    } else {
+      ctx.body = utils.jsonback(0, null, "");
+    }
+  } catch (error) {
+    Logger(error);
   }
 }
 
@@ -42,6 +46,7 @@ async function Add(ctx) {
     }
   } catch (error) {
     ctx.body = utils.jsonback(-10000, error.toString(), "插入有误");
+    Logger(error);
   }
 }
 
@@ -57,13 +62,16 @@ async function Update(ctx) {
   const params = utils.toSentence(body);
 
   const updateSt = `update ${TABLE_NAME} set ${params} where ${TABLE_NAME}.id=${id}`;
+  try {
+    const res = await utils.execGetRes(updateSt);
 
-  const res = await utils.execGetRes(updateSt);
-
-  if (res.changedRows === 1) {
-    ctx.body = utils.jsonback(0, "success", "更新1条数据");
-  } else {
-    ctx.body = utils.jsonback(0, null, "无更新");
+    if (res.changedRows === 1) {
+      ctx.body = utils.jsonback(0, "success", "更新1条数据");
+    } else {
+      ctx.body = utils.jsonback(0, null, "无更新");
+    }
+  } catch (error) {
+    Logger(error);
   }
 }
 
@@ -86,6 +94,7 @@ async function Delete(ctx) {
     }
   } catch (error) {
     ctx.body = utils.jsonback(-10000, error.toString(), "删除有误");
+    Logger(error);
   }
 }
 
