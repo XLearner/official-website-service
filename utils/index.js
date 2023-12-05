@@ -1,3 +1,5 @@
+import connection from "./mysql.js";
+
 export const baseUrl = "http://localhost:3000";
 
 function jsonback(code, data, msg) {
@@ -42,8 +44,13 @@ function execQuery(connection, sentence) {
   });
 }
 
+function execGetRes(sentence) {
+  return execQuery(connection, sentence);
+}
+
 export default {
   jsonback,
   toSentence,
   execQuery,
+  execGetRes,
 };

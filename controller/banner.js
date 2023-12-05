@@ -1,6 +1,4 @@
-import mysql from "mysql";
 import utils, { baseUrl } from "../utils/index.js";
-import connection from "../utils/mysql.js";
 
 const TABLE_NAME1 = "img_repo";
 
@@ -14,11 +12,8 @@ async function UploadImg(ctx) {
     const type = ctx.request.body.type || "banner";
     const updateSt = `insert into ${TABLE_NAME1}(imgName, path, type) values("${imgName}", "${imgurl}", "${type}")`;
 
-    const pro = utils.execQuery(connection, updateSt);
+    const res = await utils.execGetRes(updateSt);
 
-    const res = await pro;
-
-    // @ts-ignore
     if (res.affectedRows > 0) {
       ctx.body = utils.jsonback(
         0,
@@ -40,11 +35,8 @@ async function UploadImg(ctx) {
 async function getImg(type) {
   const updateSt = `select * from ${TABLE_NAME1} where type="${type}"`;
 
-  const pro = utils.execQuery(connection, updateSt);
+  const res = await utils.execGetRes(updateSt);
 
-  const res = await pro;
-
-  // @ts-ignore
   if (res.length > 0) {
     return res;
   }
@@ -75,10 +67,7 @@ async function SaveBanner(ctx) {
   const date = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`;
   const updateSt = `insert into banner(imgurl, title, description, date) values("${imgurl}", "${title}", "${description}", "${date}")`;
 
-  const pro = utils.execQuery(connection, updateSt);
-
-  const res = await pro;
-  // @ts-ignore
+  const res = await utils.execGetRes(updateSt);
   if (res.affectedRows > 0) {
     ctx.body = utils.jsonback(0, "", "成功添加banner");
   } else {
@@ -91,8 +80,7 @@ async function SaveBanner(ctx) {
  */
 async function GetBannerImg(ctx) {
   const updateSt = `select * from banner`;
-  const pro = utils.execQuery(connection, updateSt);
-  const res = await pro;
+  const res = await utils.execGetRes(updateSt);
 
   if (res.length > 0) {
     const imgList = res.map((ele) => ({
@@ -115,10 +103,8 @@ async function DeleteBanner(ctx) {
 
   const updateSt = `delete from banner where id="${id}"`;
 
-  const pro = utils.execQuery(connection, updateSt);
-
   try {
-    const res = await pro;
+    const res = await utils.execGetRes(updateSt);
     if (res.affectedRows > 0) {
       ctx.body = utils.jsonback(0, "success", "更新1条数据");
     } else {

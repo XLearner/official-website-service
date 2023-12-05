@@ -1,7 +1,5 @@
-import mysql from "mysql";
 import { createHash } from "crypto";
 import utils, { baseUrl } from "../utils/index.js";
-import connection from "../utils/mysql.js";
 import bannerControl from "./banner.js";
 import businessControl from "./business.js";
 import customControl from "./custom.js";
@@ -11,7 +9,6 @@ import newsControl from "./news.js";
 import recruitControl from "./recruit.js";
 
 const TABLE_NAME = "base_info";
-const tokenKey = "zh_token";
 
 async function Check(ctx) {
   const token = ctx.headers.zhtoken;
@@ -27,13 +24,12 @@ async function Check(ctx) {
 }
 
 async function Login(ctx) {
-  console.log("request body", ctx.request.body);
   const { account, pwd } = ctx.request.body;
   const header = ctx.request.header;
 
   // 检查账密是否正确
   const updateSt = `select pwd from account where account="${account}";`;
-  const res = await utils.execQuery(connection, updateSt);
+  const res = await utils.execGetRes(updateSt);
   if (res[0].pwd !== pwd) {
     ctx.body = utils.jsonback(-3, "", "账号密码错误");
     return;
@@ -47,15 +43,9 @@ async function Login(ctx) {
   if (await ifLogin(token)) {
     const now = (Date.now() / 1000) >> 0;
     const updateSt = `update token set token="${token}",timestamp="${now}" where token.token="${token}"`;
-    const res = await utils.execQuery(connection, updateSt);
+    const res = await utils.execGetRes(updateSt);
     console.log(ctx);
     if (res.affectedRows > 0) {
-      // ctx.cookies.set(tokenKey, token, {
-      //   httpOnly: false,
-      //   domain: "127.0.0.1",
-      //   // secure: true,
-      //   // sameSite: "none",
-      // });
       ctx.body = utils.jsonback(
         1,
         {
@@ -67,14 +57,8 @@ async function Login(ctx) {
   } else {
     const date = (Date.now() / 1000) >> 0;
     const updateSt = `insert into token(token, timestamp) values("${token}", "${date}");`;
-    const res = await utils.execQuery(connection, updateSt);
+    const res = await utils.execGetRes(updateSt);
     if (res.affectedRows > 0) {
-      // ctx.cookies.set(tokenKey, token, {
-      //   httpOnly: false,
-      //   domain: "127.0.0.1",
-      //   // secure: true,
-      //   // sameSite: "none",
-      // });
       ctx.body = utils.jsonback(
         0,
         {
@@ -92,7 +76,7 @@ async function Login(ctx) {
 async function ifLogin(token) {
   const updateSt = `select * from token where token.token="${token}"`;
 
-  const res = await utils.execQuery(connection, updateSt);
+  const res = await utils.execGetRes(updateSt);
 
   // 是否已登录
   if (res.length > 0) {
@@ -110,7 +94,7 @@ export async function ifOvertime(token) {
     return true;
   } else {
     const updateSt = `select * from token where token.token="${token}"`;
-    const res = await utils.execQuery(connection, updateSt);
+    const res = await utils.execGetRes(updateSt);
     if (res.length > 0) {
       const now = (Date.now() / 1000) >> 0;
       const diff = now - res[0].timestamp;
@@ -128,7 +112,7 @@ export async function ifOvertime(token) {
 async function Logout(ctx) {
   const token = ctx.headers.zhtoken;
   const updateSt = `delete from token where token="${token}"`;
-  const res = await utils.execQuery(connection, updateSt);
+  const res = await utils.execGetRes(updateSt);
 
   if (res.affectedRows > 0) {
     ctx.body = utils.jsonback(0, "", "成功登出");
@@ -145,9 +129,7 @@ async function Index(ctx) {
   const params = Object.fromEntries(url.searchParams.entries());
 
   const updateSt = `SELECT * from zh_office_website.${TABLE_NAME} t1 where t1.name like "%${params.name}%"`;
-  const pro = utils.execQuery(connection, updateSt);
-
-  const res = await pro;
+  const res = await utils.execGetRes(updateSt);
 
   if (res.length > 0) {
     const imgList = res.map((ele) => ({
@@ -171,11 +153,8 @@ async function SetInfo(ctx, next) {
 
   const updateSt = `update ${TABLE_NAME} set ${params} where ${TABLE_NAME}.id="${body.id}"`;
 
-  const pro = utils.execQuery(connection, updateSt);
+  const res = await utils.execGetRes(updateSt);
 
-  const res = await pro;
-
-  // @ts-ignore
   if (res.changedRows === 1) {
     ctx.body = utils.jsonback(0, "success", "更新1条数据");
   } else {
@@ -196,10 +175,8 @@ async function AddInfo(ctx, next) {
     .join(",");
   const updateSt = `insert into ${TABLE_NAME}(${keys}) values(${values})`;
 
-  const pro = utils.execQuery(connection, updateSt);
-
   try {
-    const res = await pro;
+    const res = await utils.execGetRes(updateSt);
 
     // @ts-ignore
     if (res.affectedRows > 0) {
@@ -229,12 +206,9 @@ async function DeleteInfo(ctx, next) {
 
   const updateSt = `delete from ${TABLE_NAME} where name="${name}"`;
 
-  const pro = utils.execQuery(connection, updateSt);
-
   try {
-    const res = await pro;
+    const res = await utils.execGetRes(updateSt);
 
-    // @ts-ignore
     if (res.affectedRows > 0) {
       ctx.body = utils.jsonback(0, "success", "更新1条数据");
     } else {
@@ -245,13 +219,6 @@ async function DeleteInfo(ctx, next) {
   }
 }
 
-// module.exports = {
-//   Index,
-//   SetInfo,
-//   AddInfo,
-//   DeleteInfo,
-//   ...bannerControl,
-// };
 export default {
   Check,
   Login,

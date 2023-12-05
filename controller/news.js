@@ -1,14 +1,10 @@
-import mysql from "mysql";
 import utils from "../utils/index.js";
-import connection from "../utils/mysql.js";
 
 const TABLE_NAME = "news";
 
 async function Search(ctx) {
   const updateSt = `SELECT * from zh_office_website.${TABLE_NAME};`;
-  const pro = utils.execQuery(connection, updateSt);
-
-  const res = await pro;
+  const res = await utils.execGetRes(updateSt);
 
   if (res.length > 0) {
     ctx.body = utils.jsonback(0, res, "");
@@ -30,12 +26,9 @@ async function Add(ctx) {
   const values = [title, date, description].map((ele) => `"${ele}"`).join(",");
   const updateSt = `insert into ${TABLE_NAME}(${keys}) values(${values})`;
 
-  const pro = utils.execQuery(connection, updateSt);
-
   try {
-    const res = await pro;
+    const res = await utils.execGetRes(updateSt);
 
-    // @ts-ignore
     if (res.affectedRows > 0) {
       ctx.body = utils.jsonback(0, "success", "更新1条数据");
     } else {
@@ -59,9 +52,7 @@ async function Update(ctx) {
 
   const updateSt = `update ${TABLE_NAME} set ${params} where ${TABLE_NAME}.id=${id}`;
 
-  const pro = utils.execQuery(connection, updateSt);
-
-  const res = await pro;
+  const res = await utils.execGetRes(updateSt);
 
   if (res.changedRows === 1) {
     ctx.body = utils.jsonback(0, "success", "更新1条数据");
@@ -79,10 +70,8 @@ async function Delete(ctx) {
 
   const updateSt = `delete from ${TABLE_NAME} where id="${id}"`;
 
-  const pro = utils.execQuery(connection, updateSt);
-
   try {
-    const res = await pro;
+    const res = await utils.execGetRes(updateSt);
 
     if (res.affectedRows > 0) {
       ctx.body = utils.jsonback(0, "success", "更新1条数据");

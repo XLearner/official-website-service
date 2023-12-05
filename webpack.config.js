@@ -1,5 +1,4 @@
 import webpack from "webpack";
-// import TerserPlugin from "terser-webpack-plugin";
 import path from "path";
 
 const filename = "service.js";
