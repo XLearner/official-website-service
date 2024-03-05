@@ -59,7 +59,6 @@ async function AddInfo(ctx, next) {
   try {
     const res = await utils.execGetRes(updateSt);
 
-    // @ts-ignore
     if (res.affectedRows > 0) {
       ctx.body = utils.jsonback(0, "success", "更新1条数据");
     } else {
@@ -76,8 +75,6 @@ async function AddInfo(ctx, next) {
  */
 async function DeleteInfo(ctx, next) {
   const body = ctx.request.body;
-
-  const params = utils.toSentence(body);
 
   const name = body.name;
   if (!name) {

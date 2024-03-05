@@ -3,6 +3,7 @@ import utils from "../utils/index.js";
 import baseInfoControl from "./baseinfo.js";
 import bannerControl from "./banner.js";
 import businessControl from "./business.js";
+import contactusControl from "./contactus.js";
 import customControl from "./custom.js";
 import imageControl from "./image.js";
 import advantageControl from "./advantage.js";
@@ -129,6 +130,7 @@ export default {
   baseInfoControl,
   bannerControl,
   businessControl,
+  contactusControl,
   customControl,
   imageControl,
   newsControl,
