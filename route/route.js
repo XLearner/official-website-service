@@ -1,6 +1,6 @@
 import Route from "koa-router";
 import controller from "../controller/index.js";
-import multer from "@koa/multer";
+import Multer from "@koa/multer";
 
 const route = new Route();
 
@@ -14,7 +14,7 @@ route.post("/v1/set/info", controller.baseInfoControl.Set);
 route.post("/v1/add/info", controller.baseInfoControl.Add);
 route.post("/v1/delete/info", controller.baseInfoControl.Delete);
 
-const storage = multer.diskStorage({
+const storage = Multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "./assets/photo");
   },
@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + "-" + Date.now() + type);
   },
 });
-const upload = multer({ storage: storage });
+const upload = Multer({ storage: storage });
 
 // 图片
 route.post(
@@ -76,5 +76,9 @@ route.get("/v1/get/recruit", controller.recruitControl.Search);
 route.post("/v1/add/recruit", controller.recruitControl.Add);
 route.post("/v1/set/recruit", controller.recruitControl.Update);
 route.post("/v1/delete/recruit", controller.recruitControl.Delete);
+
+// 联系我们
+route.post("/v1/add/contactus", controller.contactusControl.Add);
+route.post("/v1/get/contactus-all", controller.contactusControl.GetAll);
 
 export default route.routes();

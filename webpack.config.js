@@ -1,6 +1,6 @@
 import path from "path";
 
-const filename = "service.js";
+const filename = "service.cjs";
 const __dirname = path.resolve();
 
 const config = {

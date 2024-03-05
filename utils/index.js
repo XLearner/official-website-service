@@ -1,7 +1,7 @@
 import { Logger } from "./logger.js";
 import connection from "./mysql.js";
 
-export const baseUrl = "http://localhost:3000";
+export const baseUrl = "http://localhost:8903";
 
 function jsonback(code, data, msg) {
   return {

@@ -1,12 +1,13 @@
 import mysql from "mysql";
-import { Logger } from "./logger.js";
-const remote = ["10.0.12.12", "yanli@1647"];
-const localhost = ["localhost", "yanli"];
+import remote from './config.js';
+import localhost from './config.js';
+
+const config = remote;
 
 const connection = mysql.createConnection({
-  host: localhost[0],
+  host: config[0],
   user: "root",
-  password: localhost[1],
+  password: config[1],
   database: "zh_office_website",
 });
 connection.connect();
