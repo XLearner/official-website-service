@@ -11,6 +11,30 @@ function jsonback(code, data, msg) {
   };
 }
 
+function isEmpty(params) {
+  if (!Array.isArray(params)) return true;
+  for (let i = 0, len = params.length; i < len; i++) {
+    const item = params[i];
+    if (Array.isArray(item) && item.length === 0) {
+      return true;
+    } else if (
+      Object.prototype.toString.call(item).indexOf("Object") > 0 &&
+      Object.keys(item).length === 0
+    ) {
+      return true;
+    } else if (!item) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getCurrentTime() {
+  const now = new Date();
+  const date = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`;
+  return date;
+}
+
 /**
  * 将对象转换为类 querystring 形式
  * 如：
@@ -55,4 +79,6 @@ export default {
   toSentence,
   execQuery,
   execGetRes,
+  isEmpty,
+  getCurrentTime,
 };

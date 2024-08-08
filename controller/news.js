@@ -1,4 +1,4 @@
-import utils from "../utils/index.js";
+import utils, { baseUrl } from "../utils/index.js";
 
 const TABLE_NAME = "news";
 
@@ -7,23 +7,40 @@ async function Search(ctx) {
   const res = await utils.execGetRes(updateSt);
 
   if (res.length > 0) {
-    ctx.body = utils.jsonback(0, res, "");
+    const imgList = res.map((ele) => ({
+      ...ele,
+      outImg: `${baseUrl}${ele.outImg}`,
+    }));
+    ctx.body = utils.jsonback(0, imgList, "");
   } else {
     ctx.body = utils.jsonback(0, null, "");
   }
 }
 
+/**
+ *
+ * @param {Object} ctx [
+ *    {
+ *      title: string;
+ *      time: string;
+ *      outImg: string;
+ *      content: string;
+ *    }
+ * ]
+ * @returns
+ */
 async function Add(ctx) {
-  const { title, description } = ctx.request.body;
+  const { title, time, outImg, content } = ctx.request.body;
 
-  if (!title || !description) {
+  if (utils.isEmpty([title, time, outImg, content])) {
     ctx.body = utils.jsonback(-1, "", "参数不全");
     return;
   }
-  const now = new Date();
-  const date = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`;
-  const keys = ["title", "date", "description"];
-  const values = [title, date, description].map((ele) => `"${ele}"`).join(",");
+  const date = utils.getCurrentTime();
+  const keys = ["title", "time", "outImg", "content", "date"];
+  const values = [title, time, outImg, content, date]
+    .map((ele) => `"${ele}"`)
+    .join(",");
   const updateSt = `insert into ${TABLE_NAME}(${keys}) values(${values})`;
 
   try {
