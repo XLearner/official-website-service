@@ -13,8 +13,7 @@ async function Add(ctx) {
     ctx.body = utils.jsonback(-1, null, "参数填写不完整");
     return;
   }
-  const now = new Date();
-  const date = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`;
+  const date = utils.getCurrentTime();
   const updateSt = `insert into ${TABLE_NAME1}(imgurl, title, description, date) values("${imgurl}", "${title}", "${description}", "${date}")`;
   try {
     const res = await utils.execGetRes(updateSt);
