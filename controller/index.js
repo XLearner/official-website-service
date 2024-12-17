@@ -10,6 +10,7 @@ import advantageControl from "./advantage.js";
 import relativeServiceControl from "./relativeService.js";
 import newsControl from "./news.js";
 import recruitControl from "./recruit.js";
+import trackControl from "./track.js";
 
 async function Check(ctx) {
   const token = ctx.headers.zhtoken;
@@ -136,4 +137,5 @@ export default {
   newsControl,
   recruitControl,
   relativeServiceControl,
+  trackControl,
 };
