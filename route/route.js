@@ -81,4 +81,10 @@ route.post("/v1/delete/recruit", controller.recruitControl.Delete);
 route.post("/v1/add/contactus", controller.contactusControl.Add);
 route.post("/v1/get/contactus-all", controller.contactusControl.GetAll);
 
+// 轨迹
+route.get("/v1/get/track", controller.trackControl.Search);
+route.post("/v1/add/track", controller.trackControl.Add);
+route.post("/v1/set/track", controller.trackControl.Update);
+route.post("/v1/delete/track", controller.trackControl.Delete);
+
 export default route.routes();
