@@ -49,7 +49,7 @@ function toSentence(obj) {
   let st = "";
 
   for (const [key, val] of Object.entries(obj)) {
-    st += `${key}="${val}",`;
+    st += `${key}="${val.replaceAll('"', '\\"')}",`;
   }
 
   st = st.slice(0, -1);
