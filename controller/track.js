@@ -3,7 +3,13 @@ import utils from "../utils/index.js";
 const TABLE_NAME = "track";
 
 async function Search(ctx) {
-  const updateSt = `SELECT * from zh_office_website.${TABLE_NAME};`;
+  const id = ctx.query.id;
+  let updateSt = "";
+  if (id) {
+    updateSt = `SELECT * from zh_office_website.${TABLE_NAME} where id='${id}';`;
+  } else {
+    updateSt = `SELECT * from zh_office_website.${TABLE_NAME};`;
+  }
 
   const res = await utils.execGetRes(updateSt);
 
@@ -22,13 +28,11 @@ async function Add(ctx) {
     return;
   }
 
-  const keys = ["id", "state", "origin", "destination", "updateTime", "date"];
-  const now = new Date();
-  //   const date = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`;
+  const keys = ["id", "state", "origin", "destination", "updateTime"];
   const values = [id, state, origin, destination, updateTime]
     .map((ele) => `"${ele}"`)
     .join(",");
-  const updateSt = `insert into ${TABLE_NAME}(${keys}) values(${values}, ${now})`;
+  const updateSt = `insert into ${TABLE_NAME}(${keys}) values(${values})`;
 
   try {
     const res = await utils.execGetRes(updateSt);

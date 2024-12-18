@@ -42,7 +42,7 @@ app.use(async (ctx, next) => {
   ctx.set("Access-Control-Allow-Origin", origin);
   ctx.set(
     "Access-Control-Allow-Headers",
-    "zhtoken, Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild"
+    "Access-Control-Allow-Credentials, Access-Control-Allow-Methods, Access-Control-Allow-Origin, zhtoken, Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild"
   );
   ctx.set("Access-Control-Allow-Credentials", true);
   ctx.set("Access-Control-Allow-Methods", "PUT, POST, GET, DELETE, OPTIONS");
