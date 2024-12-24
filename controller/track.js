@@ -21,15 +21,15 @@ async function Search(ctx) {
 }
 
 async function Add(ctx) {
-  const { id, state, origin, destination, updateTime } = ctx.request.body;
+  const { id, state, origin, destination, updateTime, ps } = ctx.request.body;
 
   if (!id || !destination || !updateTime) {
     ctx.body = utils.jsonback(-1, "", "参数不全");
     return;
   }
 
-  const keys = ["id", "state", "origin", "destination", "updateTime"];
-  const values = [id, state, origin, destination, updateTime]
+  const keys = ["id", "state", "origin", "destination", "updateTime", "ps"];
+  const values = [id, state, origin, destination, updateTime, ps]
     .map((ele) => `"${ele}"`)
     .join(",");
   const updateSt = `insert into ${TABLE_NAME}(${keys}) values(${values})`;
