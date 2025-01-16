@@ -1,4 +1,5 @@
 import path from "path";
+import nodeExternals from "webpack-node-externals";
 
 const filename = "service.cjs";
 const __dirname = path.resolve();
@@ -7,6 +8,7 @@ const config = {
   target: "node",
   mode: "production",
   resolve: {
+    modules: [path.join(__dirname, "index.js"), "node_modules"],
     extensions: ["*", ".mjs", ".cjs", ".ts", ".js"],
   },
   entry: path.resolve(__dirname, "index.js"),
@@ -16,8 +18,9 @@ const config = {
     //   type: "this",
     // },
     // clean: true,
-    // libraryTarget: "commonjs2",
+    // libraryTarget: "commonjs",
   },
+  externals: [nodeExternals()],
   module: {
     rules: [
       // {
