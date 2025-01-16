@@ -1,7 +1,7 @@
-import mysql from "mysql";
+import mysql from "mysql2";
 import { remote, localhost } from "./config.js";
 
-const config = localhost;
+const config = remote;
 
 const connection = mysql.createConnection({
   host: config[0],
