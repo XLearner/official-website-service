@@ -2,7 +2,7 @@ import utils from "../utils/index.js";
 
 const TABLE_NAME = "track";
 
-async function Search(ctx) {
+async function getFromDb(ctx) {
   const id = ctx.query.id;
   let updateSt = "";
   if (id) {
@@ -14,18 +14,26 @@ async function Search(ctx) {
   const res = await utils.execGetRes(updateSt);
 
   if (res.length > 0) {
-    ctx.body = utils.jsonback(0, res, "");
+    return [res.length, res];
+  } else {
+    return [0, null];
+  }
+}
+
+async function Search(ctx) {
+  const res = await getFromDb(ctx);
+  if (res[0] > 0) {
+    ctx.body = utils.jsonback(0, res[1], "");
   } else {
     ctx.body = utils.jsonback(0, null, "");
   }
 }
 
-async function Add(ctx) {
+async function addToDb(ctx) {
   const { id, state, origin, destination, updateTime, ps } = ctx.request.body;
 
   if (!id || !destination || !updateTime) {
-    ctx.body = utils.jsonback(-1, "", "参数不全");
-    return;
+    return [-1, "参数不全"];
   }
 
   const keys = ["id", "state", "origin", "destination", "updateTime", "ps"];
@@ -33,29 +41,41 @@ async function Add(ctx) {
     .map((ele) => `"${ele}"`)
     .join(",");
   const updateSt = `insert into ${TABLE_NAME}(${keys}) values(${values})`;
-
   try {
     const res = await utils.execGetRes(updateSt);
 
     if (res.affectedRows > 0) {
-      ctx.body = utils.jsonback(0, "success", "更新1条数据");
+      // ctx.body = utils.jsonback(0, "success", "更新1条数据");
+      return [1, "更新1条数据"];
     } else {
-      ctx.body = utils.jsonback(0, null, "无更新");
+      // ctx.body = utils.jsonback(0, null, "无更新");
+      return [0, "无更新"];
     }
   } catch (error) {
-    ctx.body = utils.jsonback(-10000, error.toString(), "插入有误");
+    // ctx.body = utils.jsonback(-10000, error.toString(), "插入有误");
+    return [-10001, error.toString() + "- 插入有误"];
   }
 }
 
-async function Update(ctx) {
+async function Add(ctx) {
+  const res = await addToDb(ctx);
+
+  if (res[0] > 0) {
+    ctx.body = utils.jsonback(res[0], "success", res[1]);
+  } else if (res[0] == 0) {
+    ctx.body = utils.jsonback(res[0], null, res[1]);
+  } else {
+    ctx.body = utils.jsonback(res[0], res[1], "插入有误");
+  }
+}
+
+async function updateToDb(ctx) {
   const body = ctx.request.body;
   if (!body.id) {
-    ctx.body = utils.jsonback(-1, "", "缺少id");
-    return;
+    return [-1, "缺少id"];
   }
   if (isNaN(body.state)) {
-    ctx.body = utils.jsonback(-1, "", "state输入有误");
-    return;
+    return [-2, "state输入有误"];
   }
 
   const id = body.id;
@@ -70,17 +90,24 @@ async function Update(ctx) {
   const res = await utils.execGetRes(updateSt);
 
   if (res.changedRows === 1) {
-    ctx.body = utils.jsonback(0, "success", "更新1条数据");
+    return [res.changedRows, "数据已更新"];
   } else {
-    ctx.body = utils.jsonback(0, null, "无更新");
+    return [0, "无更新"];
   }
 }
+async function Update(ctx) {
+  const res = await updateToDb(ctx);
 
-async function Delete(ctx) {
+  if (res[0] > 0) {
+    ctx.body = utils.jsonback(res[0], "success", res[1]);
+  } else {
+    ctx.body = utils.jsonback(res[0], null, res[1]);
+  }
+}
+async function delFromDb(ctx) {
   const id = ctx.request.body.id;
   if (!id) {
-    ctx.body = utils.jsonback(-1, "", "待删除id为空");
-    return;
+    return [-1, "待删除id为空"];
   }
 
   const updateSt = `delete from ${TABLE_NAME} where id="${id}"`;
@@ -89,12 +116,24 @@ async function Delete(ctx) {
     const res = await utils.execGetRes(updateSt);
 
     if (res.affectedRows > 0) {
-      ctx.body = utils.jsonback(0, "success", "更新1条数据");
+      return [res.affectedRows, `更新${res.affectedRows}条数据`];
     } else {
-      ctx.body = utils.jsonback(0, null, "无更新");
+      return [res.affectedRows, `无更新`];
     }
   } catch (error) {
-    ctx.body = utils.jsonback(-10000, error.toString(), "删除有误");
+    // ctx.body = utils.jsonback(-10000, error.toString(), "删除有误");
+    return [-10002, error.toString() + "- 删除有误"];
+  }
+}
+async function Delete(ctx) {
+  const res = await delFromDb(ctx);
+
+  if (res[0] > 0) {
+    ctx.body = utils.jsonback(res[0], "success", res[1]);
+  } else if (res[0] == 0) {
+    ctx.body = utils.jsonback(res[0], null, res[1]);
+  } else {
+    ctx.body = utils.jsonback(res[0], res[1], "删除有误");
   }
 }
 
@@ -103,4 +142,8 @@ export default {
   Add,
   Update,
   Delete,
+  getFromDb,
+  addToDb,
+  updateToDb,
+  delFromDb,
 };
