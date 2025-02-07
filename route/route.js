@@ -87,4 +87,16 @@ route.post("/v1/add/track", controller.trackControl.Add);
 route.post("/v1/set/track", controller.trackControl.Update);
 route.post("/v1/delete/track", controller.trackControl.Delete);
 
+// 订单
+route.get("/v1/get/order", controller.orderControl.Search);
+route.post("/v1/add/order", controller.orderControl.Add);
+route.post("/v1/set/order", controller.orderControl.Update);
+route.post("/v1/delete/order", controller.orderControl.Delete);
+
+// 用户
+route.get("/v1/get/users", controller.userControl.Search);
+route.post("/v1/add/user", controller.userControl.Add);
+route.post("/v1/set/user", controller.userControl.Update);
+route.post("/v1/delete/user", controller.userControl.Delete);
+
 export default route.routes();
