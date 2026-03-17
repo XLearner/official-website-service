@@ -13,6 +13,7 @@ import recruitControl from "./recruit.js";
 import trackControl from "./track.js";
 import userControl from "./user.js";
 import orderControl from "./order.js";
+import navControl from "./nav.js";
 
 async function Check(ctx) {
   const token = ctx.headers.zhtoken;
@@ -142,4 +143,5 @@ export default {
   trackControl,
   userControl,
   orderControl,
+  navControl,
 };
