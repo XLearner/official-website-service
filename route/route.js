@@ -99,4 +99,8 @@ route.post("/v1/add/user", controller.userControl.Add);
 route.post("/v1/set/user", controller.userControl.Update);
 route.post("/v1/delete/user", controller.userControl.Delete);
 
+// 权限菜单
+route.get("/v1/get/nav", controller.navControl.Search);
+route.post("/v1/set/nav", controller.navControl.Set);
+
 export default route.routes();
