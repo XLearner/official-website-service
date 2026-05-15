@@ -1,66 +1,66 @@
 import utils from "../utils/index.js";
-
-const TABLE_NAME1 = "img_repo";
+import imageManager from "../utils/imageManager.js";
+import fs from "fs/promises";
+import path from "path";
 
 /**
- * 上传图片 并返回图片路径和文件名
+ * 上传图片 → 压缩 → 存入 temp
  */
 async function Upload(ctx) {
-  if (ctx.file) {
-    const imgName = ctx.file.filename;
-    const imgurl = "/photo/" + ctx.file.filename;
-    const type = ctx.request.body.type || "banner";
-    const updateSt = `insert into ${TABLE_NAME1}(imgName, path, type) values("${imgName}", "${imgurl}", "${type}")`;
-    try {
-      const res = await utils.execGetRes(updateSt);
-
-      if (res.affectedRows > 0) {
-        ctx.body = utils.jsonback(
-          0,
-          {
-            imgName: ctx.file.filename,
-            imgurl: imgurl,
-          },
-          "存储成功"
-        );
-      } else {
-        ctx.body = utils.jsonback(-10000, null, "存储失败");
-      }
-    } catch (error) {
-      Logger(error);
-    }
+  if (!ctx.file) {
+    ctx.body = utils.jsonback(-1, "", "未选择文件");
+    return;
   }
-}
 
-/**
- * 请求数据库获取对应类型的图片
- */
-async function getFromDb(type) {
-  const updateSt = `select * from ${TABLE_NAME1} where type="${type}"`;
+  const tempPath = path.resolve(imageManager.TEMP_DIR, ctx.file.filename);
+
   try {
-    const res = await utils.execGetRes(updateSt);
-
-    if (res.length > 0) {
-      return res;
+    // sharp 压缩（buffer 方式，直接写目标路径）
+    await imageManager.compress(ctx.file.path, tempPath);
+    // 如果 multer 存的位置和 tempPath 不同，清理 multer 的原始文件
+    if (path.resolve(ctx.file.path) !== tempPath) {
+      await fs.unlink(ctx.file.path).catch(() => {});
     }
-    return [];
+
+    const imgurl = "/temp/" + ctx.file.filename;
+    ctx.body = utils.jsonback(0, { imgurl }, "上传成功");
   } catch (error) {
-    Logger(error);
+    console.error("[upload] 压缩失败:", error.message);
+    // 如果压缩失败，保留原始文件在 temp 中
+    const imgurl = "/temp/" + ctx.file.filename;
+    try {
+      await fs.rename(ctx.file.path, tempPath);
+    } catch {}
+    ctx.body = utils.jsonback(0, { imgurl }, "上传成功（未压缩）");
   }
 }
 
 /**
- * 获取图片
+ * 获取图片（按类型从 image_usage 中查）
  */
 async function GetImg(ctx) {
   const type = ctx.request.body.type;
-  const imgList = await getFromDb(type);
+  if (!type) {
+    ctx.body = utils.jsonback(-1, "", "缺少 type 参数");
+    return;
+  }
 
-  ctx.body = utils.jsonback(0, imgList);
+  const sql = `SELECT DISTINCT imageUrl FROM image_usage WHERE entityType="${type}"`;
+  const res = await utils.execGetRes(sql);
+
+  ctx.body = utils.jsonback(0, res.map((r) => ({ imgurl: r.imageUrl })));
+}
+
+/**
+ * 手动触发 orphan 清理
+ */
+async function CleanupOrphans(ctx) {
+  await imageManager.cleanupOrphans();
+  ctx.body = utils.jsonback(0, "success", "orphan 清理已触发");
 }
 
 export default {
   Upload,
-  getFromDb,
   GetImg,
+  CleanupOrphans,
 };

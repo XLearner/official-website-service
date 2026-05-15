@@ -5,6 +5,7 @@ import path from "path";
 import router from "./route/route.js";
 import { ifOvertime } from "./controller/index.js";
 import utils from "./utils/index.js";
+import imageManager from "./utils/imageManager.js";
 
 const dirname = path.resolve();
 const app = new Koa();
@@ -73,3 +74,4 @@ app.use(async (ctx, next) => {
 app.use(router);
 app.listen(8903);
 console.log("成功启动, 请求 http://localhost:8903");
+imageManager.startScheduler();
