@@ -7,42 +7,40 @@ const __dirname = path.resolve();
 const config = {
   target: "node",
   mode: "production",
-  resolve: {
-    modules: [path.join(__dirname, "index.js"), "node_modules"],
-    extensions: ["*", ".mjs", ".cjs", ".ts", ".js"],
-  },
   entry: path.resolve(__dirname, "index.js"),
   output: {
+    path: path.resolve(__dirname, "dist"),
     filename,
-    // library: {
-    //   type: "this",
-    // },
-    // clean: true,
-    // libraryTarget: "commonjs",
+    libraryTarget: "commonjs2",
   },
-  externals: [nodeExternals()],
+  externals: [
+    // 所有 node_modules 保持 external，不打包进 bundle
+    nodeExternals(),
+    // sharp 是 native 模块，必须 external
+    "sharp",
+  ],
   module: {
     rules: [
-      // {
-      //   test: /\.js$/,
-      //   use: [
-      //     {
-      //       loader: "babel-loader",
-      //       // options: {
-      //       //   presets: [
-      //       //     [
-      //       //       "@babel/env",
-      //       //       {
-      //       //         useBuiltIns: "entry",
-      //       //         corejs: 3.29,
-      //       //       },
-      //       //     ],
-      //       //     "@babel/typescript",
-      //       //   ],
-      //       // },
-      //     },
-      //   ],
-      // },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            // 强制 webpack 4 不支持的语法被转换（如可选链 ?.）
+            // Node 22 原生支持但这些语法 webpack 4 acorn 无法解析
+            presets: [
+              [
+                "@babel/preset-env",
+                {
+                  targets: { node: "14" },
+                  modules: false,
+                },
+              ],
+            ],
+          },
+        },
+      },
       {
         test: /\.mjs$/,
         include: /node_modules/,
@@ -50,23 +48,14 @@ const config = {
         use: {
           loader: "babel-loader",
         },
-        // resolve: {
-        //   fullySpecified: false,
-        // },
       },
     ],
   },
-  // optimization: {
-  //   minimize: true,
-  //   minimizer: [
-  //     // new TerserPlugin({
-  //     //   terserOptions: {
-  //     //     compress: {},
-  //     //   },
-  //     //   extractComments: false,
-  //     // }),
-  //   ],
-  // },
+  // 避免打包 Node 内置模块
+  node: {
+    __dirname: false,
+    __filename: false,
+  },
 };
 
 export default config;
