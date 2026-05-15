@@ -1,4 +1,5 @@
 import utils from "../utils/index.js";
+import imageManager from "../utils/imageManager.js";
 
 const TABLE_NAME = "goods";
 
@@ -54,7 +55,22 @@ async function Add(ctx) {
     const res = await utils.execGetRes(updateSt);
 
     if (res.affectedRows > 0) {
-      ctx.body = utils.jsonback(0, "success", "更新1条数据");
+      // 自动 promote temp 图片并记录引用
+      const entityId = String(res.insertId);
+      const promoted = await imageManager.promoteFromBody(ctx.request.body, "goods", entityId);
+      // 将 promote 后的新 URL 回写到 DB（如果路径有变化）
+      if (promoted.length > 0) {
+        const updates = {};
+        for (const p of promoted) {
+          if (p.old === ctx.request.body.inPic) updates.inPic = p.new;
+          if (p.old === ctx.request.body.outPic) updates.outPic = p.new;
+        }
+        if (Object.keys(updates).length > 0) {
+          const setClause = utils.toSentence(updates);
+          await utils.execGetRes(`update ${TABLE_NAME} set ${setClause} where id=${entityId}`);
+        }
+      }
+      ctx.body = utils.jsonback(0, { id: entityId }, "更新1条数据");
     } else {
       ctx.body = utils.jsonback(0, null, "无更新");
     }
@@ -71,6 +87,17 @@ async function Update(ctx) {
   }
 
   const id = body.id;
+
+  // 清除旧引用，扫描新图片并 promote
+  await imageManager.removeUsage("goods", String(id));
+  const promoted = await imageManager.promoteFromBody(body, "goods", String(id));
+
+  // 如果 temp 图片被 promote 到 photo，更新 body 中的 URL
+  for (const p of promoted) {
+    if (p.old === body.inPic) body.inPic = p.new;
+    if (p.old === body.outPic) body.outPic = p.new;
+  }
+
   delete body.id;
   const params = utils.toSentence(body);
 
@@ -98,6 +125,8 @@ async function Delete(ctx) {
     const res = await utils.execGetRes(updateSt);
 
     if (res.affectedRows > 0) {
+      // 清除图片引用
+      await imageManager.removeUsage("goods", String(id));
       ctx.body = utils.jsonback(0, "success", "更新1条数据");
     } else {
       ctx.body = utils.jsonback(0, null, "无更新");
@@ -108,6 +137,14 @@ async function Delete(ctx) {
 }
 
 async function delByOrderId(orderId) {
+  // 先查出这批货物的 id，清除图片引用
+  const goodsList = await utils.execGetRes(
+    `SELECT id FROM ${TABLE_NAME} WHERE orderId="${orderId}"`
+  );
+  for (const g of goodsList) {
+    await imageManager.removeUsage("goods", String(g.id));
+  }
+
   const updateSt = `delete from ${TABLE_NAME} where orderId="${orderId}"`;
   try {
     const res = await utils.execGetRes(updateSt);

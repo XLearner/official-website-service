@@ -16,7 +16,7 @@ route.post("/v1/delete/info", controller.baseInfoControl.Delete);
 
 const storage = Multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./assets/photo");
+    cb(null, "./assets/temp");
   },
   filename: (req, file, cb) => {
     let type = file.originalname.replace(/.+\./, ".");
@@ -32,6 +32,7 @@ route.post(
   controller.imageControl.Upload
 );
 route.get("/v1/get/img", controller.imageControl.GetImg);
+route.post("/v1/cleanup/images", controller.imageControl.CleanupOrphans);
 
 // 轮播图
 route.get("/v1/get/banner", controller.bannerControl.Get);
