@@ -13,6 +13,7 @@ import recruitControl from "./recruit.js";
 import trackControl from "./track.js";
 import userControl from "./user.js";
 import orderControl from "./order.js";
+import goodsControl from "./goods.js";
 import navControl from "./nav.js";
 
 async function Check(ctx) {
@@ -143,5 +144,6 @@ export default {
   trackControl,
   userControl,
   orderControl,
+  goodsControl,
   navControl,
 };
