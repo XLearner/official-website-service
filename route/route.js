@@ -93,6 +93,12 @@ route.post("/v1/add/order", controller.orderControl.Add);
 route.post("/v1/set/order", controller.orderControl.Update);
 route.post("/v1/delete/order", controller.orderControl.Delete);
 
+// 商品
+route.get("/v1/get/goods", controller.goodsControl.Search);
+route.post("/v1/add/goods", controller.goodsControl.Add);
+route.post("/v1/set/goods", controller.goodsControl.Update);
+route.post("/v1/delete/goods", controller.goodsControl.Delete);
+
 // 用户
 route.get("/v1/get/users", controller.userControl.Search);
 route.post("/v1/add/user", controller.userControl.Add);

@@ -5,3 +5,41 @@
 
 [Service infomation]: Fri Jan 10 2025 09:52:57 GMT+0800 (China Standard Time), Error: Table 'zh_office_website.account' doesn't exist 
 
+[Service infomation]: Wed Jan 22 2025 16:37:29 GMT+0800 (China Standard Time), Error: Table 'zh_office_website.token' doesn't exist 
+
+[Service infomation]: Wed Jan 22 2025 16:37:34 GMT+0800 (China Standard Time), Error: Table 'zh_office_website.token' doesn't exist 
+
+[Service infomation]: Wed Jan 22 2025 16:49:26 GMT+0800 (China Standard Time), Error: Table 'zh_office_website.user' doesn't exist 
+
+[Service infomation]: Wed Jan 22 2025 16:49:29 GMT+0800 (China Standard Time), Error: Table 'zh_office_website.user' doesn't exist 
+
+[Service infomation]: Wed Jan 22 2025 16:55:26 GMT+0800 (China Standard Time), Error: Operand should contain 1 column(s) 
+
+[Service infomation]: Wed Jan 22 2025 16:56:04 GMT+0800 (China Standard Time), Error: Operand should contain 1 column(s) 
+
+[Service infomation]: Wed Jan 22 2025 17:23:15 GMT+0800 (China Standard Time), Error: Data too long for column 'date' at row 1 
+
+[Service infomation]: Wed Feb 05 2025 14:45:15 GMT+0800 (China Standard Time), Error: Unknown column 'origin' in 'field list' 
+
+[Service infomation]: Wed Feb 05 2025 14:45:52 GMT+0800 (China Standard Time), Error: Unknown column 'origin' in 'field list' 
+
+[Service infomation]: Wed Feb 05 2025 14:47:05 GMT+0800 (China Standard Time), Error: Unknown column 'origin' in 'field list' 
+
+[Service infomation]: Thu Feb 06 2025 15:05:20 GMT+0800 (China Standard Time), Error: Duplicate entry 'test23' for key 'track.PRIMARY' 
+
+[Service infomation]: Thu Feb 06 2025 15:09:04 GMT+0800 (China Standard Time), Error: Unknown column 'undefined' in 'field list' 
+
+[Service infomation]: Thu Feb 06 2025 15:10:04 GMT+0800 (China Standard Time), Error: Unknown column 'undefined' in 'field list' 
+
+[Service infomation]: Thu Feb 06 2025 15:11:04 GMT+0800 (China Standard Time), Error: Incorrect datetime value: '2025-02-06T07:06:05.501Z' for column 'createTime' at row 1 
+
+[Service infomation]: Thu Feb 06 2025 15:11:35 GMT+0800 (China Standard Time), Error: Incorrect datetime value: '2025-02-06T07:06:05.501Z' for column 'createTime' at row 1 
+
+[Service infomation]: Thu Feb 06 2025 15:21:50 GMT+0800 (China Standard Time), Error: Incorrect datetime value: '1738826482426' for column 'createTime' at row 1 
+
+[Service infomation]: Thu Feb 06 2025 15:25:17 GMT+0800 (China Standard Time), Error: Incorrect integer value: '' for column 'goods_number' at row 1 
+
+[Service infomation]: Thu Feb 06 2025 15:28:17 GMT+0800 (China Standard Time), Error: Invalid JSON text: "Invalid value." at position 0 in value for column 'orders.goods_size'. 
+
+[Service infomation]: Thu Feb 06 2025 20:29:54 GMT+0800 (China Standard Time), Error: Truncated incorrect DOUBLE value: 'order2' 
+
