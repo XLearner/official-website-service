@@ -1,4 +1,4 @@
-import utils from "../utils/index.js";
+import utils, { baseUrl } from "../utils/index.js";
 import imageManager from "../utils/imageManager.js";
 
 const TABLE_NAME = "goods";
@@ -15,7 +15,12 @@ async function Search(ctx) {
   const res = await utils.execGetRes(updateSt);
 
   if (res.length > 0) {
-    ctx.body = utils.jsonback(0, res, "");
+    const data = res.map((item) => ({
+      ...item,
+      inPic: item.inPic ? `${baseUrl}${item.inPic}` : item.inPic,
+      outPic: item.outPic ? `${baseUrl}${item.outPic}` : item.outPic,
+    }));
+    ctx.body = utils.jsonback(0, data, "");
   } else {
     ctx.body = utils.jsonback(0, [], "");
   }
@@ -37,16 +42,49 @@ async function Add(ctx) {
     outPic,
   } = ctx.request.body;
 
-  if (!orderId || !name || realWeight === undefined || weight === undefined || !ifCustoms) {
-    ctx.body = utils.jsonback(-1, "", "参数不全: orderId, name, realWeight, weight, ifCustoms 为必填");
+  if (
+    !orderId ||
+    !name ||
+    realWeight === undefined ||
+    weight === undefined ||
+    !ifCustoms
+  ) {
+    ctx.body = utils.jsonback(
+      -1,
+      "",
+      "参数不全: orderId, name, realWeight, weight, ifCustoms 为必填",
+    );
     return;
   }
 
   const keys = [
-    "orderId", "name", "number", "length", "width", "height",
-    "realWeight", "weight", "ifCustoms", "ps", "inPic", "outPic",
+    "orderId",
+    "name",
+    "number",
+    "length",
+    "width",
+    "height",
+    "realWeight",
+    "weight",
+    "ifCustoms",
+    "ps",
+    "inPic",
+    "outPic",
   ];
-  const vals = [orderId, name, number, length, width, height, realWeight, weight, ifCustoms, ps, inPic, outPic]
+  const vals = [
+    orderId,
+    name,
+    number,
+    length,
+    width,
+    height,
+    realWeight,
+    weight,
+    ifCustoms,
+    ps,
+    inPic,
+    outPic,
+  ]
     .map((ele) => (ele !== undefined && ele !== null ? `"${ele}"` : "null"))
     .join(",");
   const updateSt = `insert into ${TABLE_NAME}(${keys}) values(${vals})`;
@@ -57,7 +95,11 @@ async function Add(ctx) {
     if (res.affectedRows > 0) {
       // 自动 promote temp 图片并记录引用
       const entityId = String(res.insertId);
-      const promoted = await imageManager.promoteFromBody(ctx.request.body, "goods", entityId);
+      const promoted = await imageManager.promoteFromBody(
+        ctx.request.body,
+        "goods",
+        entityId,
+      );
       // 将 promote 后的新 URL 回写到 DB（如果路径有变化）
       if (promoted.length > 0) {
         const updates = {};
@@ -67,7 +109,9 @@ async function Add(ctx) {
         }
         if (Object.keys(updates).length > 0) {
           const setClause = utils.toSentence(updates);
-          await utils.execGetRes(`update ${TABLE_NAME} set ${setClause} where id=${entityId}`);
+          await utils.execGetRes(
+            `update ${TABLE_NAME} set ${setClause} where id=${entityId}`,
+          );
         }
       }
       ctx.body = utils.jsonback(0, { id: entityId }, "更新1条数据");
@@ -90,7 +134,11 @@ async function Update(ctx) {
 
   // 清除旧引用，扫描新图片并 promote
   await imageManager.removeUsage("goods", String(id));
-  const promoted = await imageManager.promoteFromBody(body, "goods", String(id));
+  const promoted = await imageManager.promoteFromBody(
+    body,
+    "goods",
+    String(id),
+  );
 
   // 如果 temp 图片被 promote 到 photo，更新 body 中的 URL
   for (const p of promoted) {
@@ -139,7 +187,7 @@ async function Delete(ctx) {
 async function delByOrderId(orderId) {
   // 先查出这批货物的 id，清除图片引用
   const goodsList = await utils.execGetRes(
-    `SELECT id FROM ${TABLE_NAME} WHERE orderId="${orderId}"`
+    `SELECT id FROM ${TABLE_NAME} WHERE orderId="${orderId}"`,
   );
   for (const g of goodsList) {
     await imageManager.removeUsage("goods", String(g.id));
