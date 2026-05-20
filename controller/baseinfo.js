@@ -15,8 +15,7 @@ async function Index(ctx) {
   if (res.length > 0) {
     const imgList = res.map((ele) => ({
       ...ele,
-      logo: `${baseUrl}${ele.logo}`,
-      descImg: `${baseUrl}${ele.descImg}`,
+      baseUrl,
     }));
     ctx.body = utils.jsonback(0, imgList[0], "");
   } else {

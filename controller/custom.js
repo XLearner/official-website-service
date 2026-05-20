@@ -9,7 +9,7 @@ async function Search(ctx) {
   if (res.length > 0) {
     const imgList = res.map((ele) => ({
       ...ele,
-      logo: `${baseUrl}${ele.logo}`,
+      baseUrl,
     }));
     ctx.body = utils.jsonback(0, imgList, "");
   } else {
