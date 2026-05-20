@@ -17,9 +17,7 @@ async function Search(ctx) {
   if (res.length > 0) {
     const data = res.map((item) => ({
       ...item,
-      inPic: item.inPic ? `${baseUrl}${item.inPic}` : item.inPic,
-      outPic: item.outPic ? `${baseUrl}${item.outPic}` : item.outPic,
-      signPic: item.signPic ? `${baseUrl}${item.signPic}` : item.signPic,
+      baseUrl,
     }));
     ctx.body = utils.jsonback(0, data, "");
   } else {

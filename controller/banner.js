@@ -38,7 +38,7 @@ async function Get(ctx) {
     if (res.length > 0) {
       const imgList = res.map((ele) => ({
         ...ele,
-        imgurl: `${baseUrl}${ele.imgurl}`,
+        baseUrl,
       }));
 
       ctx.body = utils.jsonback(0, imgList);
