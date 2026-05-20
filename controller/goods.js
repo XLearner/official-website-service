@@ -19,6 +19,7 @@ async function Search(ctx) {
       ...item,
       inPic: item.inPic ? `${baseUrl}${item.inPic}` : item.inPic,
       outPic: item.outPic ? `${baseUrl}${item.outPic}` : item.outPic,
+      signPic: item.signPic ? `${baseUrl}${item.signPic}` : item.signPic,
     }));
     ctx.body = utils.jsonback(0, data, "");
   } else {
@@ -40,6 +41,7 @@ async function Add(ctx) {
     ps,
     inPic,
     outPic,
+    signPic,
   } = ctx.request.body;
 
   if (
@@ -70,6 +72,7 @@ async function Add(ctx) {
     "ps",
     "inPic",
     "outPic",
+    "signPic",
   ];
   const vals = [
     orderId,
@@ -84,6 +87,7 @@ async function Add(ctx) {
     ps,
     inPic,
     outPic,
+    signPic,
   ]
     .map((ele) => (ele !== undefined && ele !== null ? `"${ele}"` : "null"))
     .join(",");
