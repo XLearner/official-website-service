@@ -93,6 +93,7 @@ route.get("/v1/get/order", controller.orderControl.Search);
 route.post("/v1/add/order", controller.orderControl.Add);
 route.post("/v1/set/order", controller.orderControl.Update);
 route.post("/v1/delete/order", controller.orderControl.Delete);
+route.get("/v1/generate/orderId", controller.orderControl.GenerateId);
 
 // 商品
 route.get("/v1/get/goods", controller.goodsControl.Search);
