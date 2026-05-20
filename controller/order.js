@@ -30,7 +30,33 @@ async function Search(ctx) {
   }
 }
 
+async function generateOrderId() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const dateStr = `${y}${m}${d}`;
+
+  let orderId;
+  let exists = true;
+
+  while (exists) {
+    const rand = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
+    orderId = `ZHWJ${dateStr}${rand}`;
+    const res = await utils.execGetRes(
+      `SELECT COUNT(*) as cnt FROM ${TABLE_NAME} WHERE orderId="${orderId}"`,
+    );
+    exists = res[0].cnt > 0;
+  }
+
+  return orderId;
+}
+
 async function Add(ctx) {
+  if (!ctx.request.body.id) {
+    ctx.request.body.id = await generateOrderId();
+  }
+
   const { key, value } = extractObj(ctx.request.body);
 
   const checkedRes = checkRequiredFields(ctx.request.body);
@@ -291,9 +317,15 @@ function convertToRequestBody(dbData) {
   };
 }
 
+async function GenerateId(ctx) {
+  const orderId = await generateOrderId();
+  ctx.body = utils.jsonback(0, { orderId }, "");
+}
+
 export default {
   Search,
   Add,
   Update,
   Delete,
+  GenerateId,
 };
