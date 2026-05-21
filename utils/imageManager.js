@@ -67,26 +67,31 @@ async function promoteFromBody(body, entityType, entityId) {
   const urls = collectImageUrls(body);
   const promoted = [];
 
+  // 预计算 photo URL 并记录引用，但不移动文件。
+  // 文件移动由 executePromotion 在 DB 更新成功后执行。
   for (const url of urls) {
     if (url.startsWith("/temp/")) {
-      const newUrl = await promoteImage(url);
-      promoted.push({ old: url, new: newUrl });
-    }
-  }
-
-  // 记录所有已 promote 的图片引用
-  for (const p of promoted) {
-    await recordUsage(p.new, entityType, entityId);
-  }
-
-  // 同时记录 body 中已有的永久图片引用
-  for (const url of urls) {
-    if (url.startsWith("/photo/")) {
+      const filename = path.basename(url);
+      const photoUrl = "/photo/" + filename;
+      await recordUsage(photoUrl, entityType, entityId);
+      promoted.push({ old: url, new: photoUrl });
+    } else if (url.startsWith("/photo/")) {
       await recordUsage(url, entityType, entityId);
     }
   }
 
   return promoted;
+}
+
+async function executePromotion(promoted) {
+  for (const p of promoted) {
+    try {
+      await promoteImage(p.old);
+    } catch (e) {
+      console.error("[imageManager] promoteImage 失败:", e.message);
+      p.new = p.old;
+    }
+  }
 }
 
 // ────────────────────────────────
@@ -97,7 +102,11 @@ async function recordUsage(imageUrl, entityType, entityId) {
   const sql = `INSERT INTO image_usage(imageUrl, entityType, entityId)
     VALUES("${imageUrl}", "${entityType}", "${entityId}")
     ON DUPLICATE KEY UPDATE createdAt=CURRENT_TIMESTAMP`;
-  await utils.execGetRes(sql);
+  try {
+    await utils.execGetRes(sql);
+  } catch (e) {
+    console.error("[imageManager] recordUsage 失败:", e.message, "sql:", sql);
+  }
 }
 
 async function removeUsage(entityType, entityId) {
@@ -128,31 +137,44 @@ async function cleanupTemp(maxAgeMs = 24 * 60 * 60 * 1000) {
   }
 }
 
-async function cleanupOrphans() {
+async function cleanupOrphans(minAgeMs = 60 * 60 * 1000) {
   try {
-    // 收集 DB 中所有被引用的图片 URL
     const sql = `SELECT DISTINCT imageUrl FROM image_usage`;
     const refs = await utils.execGetRes(sql);
 
-    // 安全机制：如果 image_usage 表为空，跳过清理，防止误删历史文件
     if (refs.length === 0) {
-      console.log("[imageManager] image_usage 为空，跳过 orphan 清理（保护历史文件）");
+      console.log(
+        "[imageManager] image_usage 为空，跳过 orphan 清理（保护历史文件）",
+      );
       return;
     }
 
     const refUrls = new Set(refs.map((r) => r.imageUrl));
+    const now = Date.now();
 
-    // 扫描 photo 目录
     const files = await fs.readdir(PHOTO_DIR);
     let deleted = 0;
 
     for (const file of files) {
+      const filePath = path.join(PHOTO_DIR, file);
       const url = "/photo/" + file;
-      if (!refUrls.has(url)) {
-        await fs.unlink(path.join(PHOTO_DIR, file));
-        deleted++;
-        console.log("[imageManager] 清理孤立图片:", file);
+
+      if (refUrls.has(url)) continue;
+
+      // 安全机制：仅删除存在超过 minAgeMs 的文件，保护刚被 promote 的图片
+      try {
+        const stat = await fs.stat(filePath);
+        if (now - stat.mtimeMs < minAgeMs) {
+          console.log("[imageManager] 跳过清理新文件:", file);
+          continue;
+        }
+      } catch {
+        continue;
       }
+
+      await fs.unlink(filePath);
+      deleted++;
+      console.log("[imageManager] 清理孤立图片:", file);
     }
 
     if (deleted > 0) {
@@ -165,9 +187,12 @@ async function cleanupOrphans() {
 
 function startScheduler() {
   // 每小时清理 temp 过期文件
-  setInterval(() => {
-    cleanupTemp();
-  }, 60 * 60 * 1000);
+  setInterval(
+    () => {
+      cleanupTemp();
+    },
+    60 * 60 * 1000,
+  );
 
   // 每天凌晨清理孤立文件
   const msToMidnight = () => {
@@ -206,6 +231,7 @@ export default {
   compress,
   promoteImage,
   promoteFromBody,
+  executePromotion,
   recordUsage,
   removeUsage,
   cleanupTemp,

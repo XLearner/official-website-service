@@ -1,5 +1,6 @@
 import utils, { baseUrl } from "../utils/index.js";
 import { Logger } from "../utils/logger.js";
+import imageManager from "../utils/imageManager.js";
 
 const TABLE_NAME1 = "banner";
 
@@ -18,6 +19,19 @@ async function Add(ctx) {
   try {
     const res = await utils.execGetRes(updateSt);
     if (res.affectedRows > 0) {
+      const entityId = String(res.insertId);
+      const promoted = await imageManager.promoteFromBody(ctx.request.body, TABLE_NAME1, entityId);
+      if (promoted.length > 0) {
+        const updates = {};
+        for (const p of promoted) {
+          if (p.old === ctx.request.body.imgurl) updates.imgurl = p.new;
+        }
+        if (Object.keys(updates).length > 0) {
+          const setClause = utils.toSentence(updates);
+          await utils.execGetRes(`update ${TABLE_NAME1} set ${setClause} where id=${entityId}`);
+        }
+      }
+      await imageManager.executePromotion(promoted);
       ctx.body = utils.jsonback(0, "", "成功添加banner");
     } else {
       ctx.body = utils.jsonback(0, "", "添加banner失败");
@@ -62,6 +76,7 @@ async function Delete(ctx) {
   try {
     const res = await utils.execGetRes(updateSt);
     if (res.affectedRows > 0) {
+      await imageManager.removeUsage(TABLE_NAME1, String(id));
       ctx.body = utils.jsonback(0, "success", "更新1条数据");
     } else {
       ctx.body = utils.jsonback(0, null, "无更新");

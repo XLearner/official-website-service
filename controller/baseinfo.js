@@ -1,4 +1,5 @@
 import utils, { baseUrl } from "../utils/index.js";
+import imageManager from "../utils/imageManager.js";
 
 const TABLE_NAME = "base_info";
 
@@ -29,6 +30,14 @@ async function Index(ctx) {
 async function SetInfo(ctx, next) {
   const body = ctx.request.body;
 
+  await imageManager.removeUsage(TABLE_NAME, String(body.id));
+  const promoted = await imageManager.promoteFromBody(body, TABLE_NAME, String(body.id));
+  for (const p of promoted) {
+    if (p.old === body.logo) body.logo = p.new;
+    if (p.old === body.descImg) body.descImg = p.new;
+  }
+
+  delete body.baseUrl;
   const params = utils.toSentence(body);
 
   const updateSt = `update ${TABLE_NAME} set ${params} where ${TABLE_NAME}.id="${body.id}"`;
@@ -36,6 +45,7 @@ async function SetInfo(ctx, next) {
   const res = await utils.execGetRes(updateSt);
 
   if (res.changedRows === 1) {
+    await imageManager.executePromotion(promoted);
     ctx.body = utils.jsonback(0, "success", "更新1条数据");
   } else {
     ctx.body = utils.jsonback(0, null, "无更新");
@@ -59,7 +69,21 @@ async function AddInfo(ctx, next) {
     const res = await utils.execGetRes(updateSt);
 
     if (res.affectedRows > 0) {
-      ctx.body = utils.jsonback(0, "success", "更新1条数据");
+      const entityId = String(res.insertId);
+      const promoted = await imageManager.promoteFromBody(ctx.request.body, TABLE_NAME, entityId);
+      if (promoted.length > 0) {
+        const updates = {};
+        for (const p of promoted) {
+          if (p.old === ctx.request.body.logo) updates.logo = p.new;
+          if (p.old === ctx.request.body.descImg) updates.descImg = p.new;
+        }
+        if (Object.keys(updates).length > 0) {
+          const setClause = utils.toSentence(updates);
+          await utils.execGetRes(`update ${TABLE_NAME} set ${setClause} where id=${entityId}`);
+        }
+      }
+      await imageManager.executePromotion(promoted);
+      ctx.body = utils.jsonback(0, { id: entityId }, "更新1条数据");
     } else {
       ctx.body = utils.jsonback(0, null, "无更新");
     }
@@ -81,12 +105,17 @@ async function DeleteInfo(ctx, next) {
     return;
   }
 
+  // 查询记录 id 以清除图片引用
+  const rows = await utils.execGetRes(`SELECT id FROM ${TABLE_NAME} where name="${name}"`);
+  const recordId = rows.length > 0 ? String(rows[0].id) : null;
+
   const updateSt = `delete from ${TABLE_NAME} where name="${name}"`;
 
   try {
     const res = await utils.execGetRes(updateSt);
 
     if (res.affectedRows > 0) {
+      if (recordId) await imageManager.removeUsage(TABLE_NAME, recordId);
       ctx.body = utils.jsonback(0, "success", "更新1条数据");
     } else {
       ctx.body = utils.jsonback(0, null, "无更新");
