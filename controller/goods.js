@@ -108,6 +108,7 @@ async function Add(ctx) {
         for (const p of promoted) {
           if (p.old === ctx.request.body.inPic) updates.inPic = p.new;
           if (p.old === ctx.request.body.outPic) updates.outPic = p.new;
+          if (p.old === ctx.request.body.signPic) updates.signPic = p.new;
         }
         if (Object.keys(updates).length > 0) {
           const setClause = utils.toSentence(updates);
@@ -116,6 +117,7 @@ async function Add(ctx) {
           );
         }
       }
+      await imageManager.executePromotion(promoted);
       ctx.body = utils.jsonback(0, { id: entityId }, "更新1条数据");
     } else {
       ctx.body = utils.jsonback(0, null, "无更新");
@@ -146,9 +148,11 @@ async function Update(ctx) {
   for (const p of promoted) {
     if (p.old === body.inPic) body.inPic = p.new;
     if (p.old === body.outPic) body.outPic = p.new;
+    if (p.old === body.signPic) body.signPic = p.new;
   }
 
   delete body.id;
+  delete body.baseUrl;
   const params = utils.toSentence(body);
 
   const updateSt = `update ${TABLE_NAME} set ${params} where ${TABLE_NAME}.id=${id}`;
@@ -156,6 +160,7 @@ async function Update(ctx) {
   const res = await utils.execGetRes(updateSt);
 
   if (res.changedRows === 1) {
+    await imageManager.executePromotion(promoted);
     ctx.body = utils.jsonback(0, "success", "更新1条数据");
   } else {
     ctx.body = utils.jsonback(0, null, "无更新");
