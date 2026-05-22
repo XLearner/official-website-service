@@ -111,4 +111,7 @@ route.post("/v1/delete/user", controller.userControl.Delete);
 route.get("/v1/get/nav", controller.navControl.Search);
 route.post("/v1/set/nav", controller.navControl.Set);
 
+// 账单
+route.post("/v1/bill/export", controller.billControl.Export);
+
 export default route.routes();

@@ -15,6 +15,7 @@ import userControl from "./user.js";
 import orderControl from "./order.js";
 import goodsControl from "./goods.js";
 import navControl from "./nav.js";
+import billControl from "./bill.js";
 
 async function Check(ctx) {
   const token = ctx.headers.zhtoken;
@@ -146,4 +147,5 @@ export default {
   orderControl,
   goodsControl,
   navControl,
+  billControl,
 };
