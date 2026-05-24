@@ -271,28 +271,22 @@ async function Export(ctx) {
   // 自适应列宽
   for (let i = 1; i <= sheet.columnCount; i++) {
     const col = sheet.getColumn(i);
-    const maxLen = Math.min(
-      Math.max(
-        ...sheet
-          .getColumn(i)
-          ._rows.flatMap(row => {
-            const val = row.getCell(i).text || "";
-            return [val.length];
-          }),
-        col.header?.length || 0
-      ) + 2,
-      40
-    );
-    col.width = maxLen;
+    const rows = sheet.getSheetValues() || [];
+    let maxLen = col.header?.length || 0;
+    for (const row of rows) {
+      if (row && typeof row === 'object') {
+        const cellVal = (row[i] != null ? String(row[i]) : "").length;
+        if (cellVal > maxLen) maxLen = cellVal;
+      }
+    }
+    col.width = Math.min(maxLen + 2, 40);
   }
 
   const buffer = await workbook.xlsx.writeBuffer();
 
+  const filename = `bill_${new Date().toISOString().slice(0, 10)}.xlsx`;
   ctx.set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-  ctx.set(
-    "Content-Disposition",
-    `attachment; filename="账单_${new Date().toISOString().slice(0, 10)}.xlsx"`
-  );
+  ctx.set("Content-Disposition", `attachment; filename="${filename}"`);
   ctx.set("Content-Length", buffer.length);
   ctx.body = buffer;
 }

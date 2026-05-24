@@ -114,4 +114,22 @@ route.post("/v1/set/nav", controller.navControl.Set);
 // 账单
 route.post("/v1/bill/export", controller.billControl.Export);
 
+// 面单
+route.post("/v1/waybill/generate", controller.waybillControl.Generate);
+
+// 客户管理
+route.get("/v1/get/customer", controller.customerControl.Search);
+route.get("/v1/customer", controller.customerControl.GetById);
+route.post("/v1/customer", controller.customerControl.Add);
+route.put("/v1/customer", controller.customerControl.Update);
+route.delete("/v1/customer", controller.customerControl.Delete);
+
+// 权限管理
+route.get("/v1/get/role", controller.permissionCtrl.SearchRoles);
+route.post("/v1/role", controller.permissionCtrl.AddRole);
+route.put("/v1/role", controller.permissionCtrl.UpdateRole);
+route.delete("/v1/role", controller.permissionCtrl.DeleteRole);
+route.get("/v1/user/role", controller.permissionCtrl.GetUserRole);
+route.post("/v1/user/assign-role", controller.permissionCtrl.AssignRole);
+
 export default route.routes();

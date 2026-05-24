@@ -16,6 +16,20 @@ import orderControl from "./order.js";
 import goodsControl from "./goods.js";
 import navControl from "./nav.js";
 import billControl from "./bill.js";
+import waybillControl from "./waybill.js";
+import customerControl from "./customer.js";
+import {
+  SearchRoles,
+  AddRole,
+  UpdateRole,
+  DeleteRole,
+  AssignRole,
+  GetUserRole,
+  initDefaultRoles,
+} from "./permission.js";
+
+// Re-export for external usage
+export { initDefaultRoles };
 
 async function Check(ctx) {
   const token = ctx.headers.zhtoken;
@@ -37,6 +51,10 @@ async function Login(ctx) {
   // 检查账密是否正确
   const updateSt = `select pwd from account where account="${account}";`;
   const res = await utils.execGetRes(updateSt);
+  if (!res || res.length === 0) {
+    ctx.body = utils.jsonback(-4, "", "用户不存在");
+    return;
+  }
   if (res[0].pwd !== pwd) {
     ctx.body = utils.jsonback(-3, "", "账号密码错误");
     return;
@@ -148,4 +166,8 @@ export default {
   goodsControl,
   navControl,
   billControl,
+  waybillControl,
+  customerControl,
+  permissionCtrl: { SearchRoles, AddRole, UpdateRole, DeleteRole, AssignRole, GetUserRole },
+  initDefaultRoles,
 };
