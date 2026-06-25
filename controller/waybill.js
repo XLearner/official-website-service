@@ -212,7 +212,7 @@ async function drawWaybill(order, goodsList, goodsIndex, totalGoods, watermark =
     ctx.translate(W / 2, H / 2);
     ctx.rotate(-0.5);
     ctx.textAlign = "center";
-    ctx.fillText("PREVIEW", 0, 0);
+    ctx.fillText("ZHONGHAN LOGISTICS", 0, 0);
     ctx.restore();
   }
 

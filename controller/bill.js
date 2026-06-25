@@ -284,6 +284,12 @@ async function Export(ctx) {
 
   const buffer = await workbook.xlsx.writeBuffer();
 
+  // 记录账单导出次数
+  const updateSt = `UPDATE zh_office_website.orders SET billExportCount = billExportCount + 1 WHERE orderId IN (${placeholders})`;
+  utils.execGetRes(updateSt).catch(err => {
+    console.error("更新账单导出次数失败:", err);
+  });
+
   const filename = `bill_${new Date().toISOString().slice(0, 10)}.xlsx`;
   ctx.set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
   ctx.set("Content-Disposition", `attachment; filename="${filename}"`);

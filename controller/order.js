@@ -279,6 +279,7 @@ function convertToRequestBody(dbData) {
     receiver_addr,
     receiver_zipcode,
     receiver_country,
+    billExportCount,
   } = dbData;
 
   const shipper = {
@@ -314,6 +315,7 @@ function convertToRequestBody(dbData) {
     receiver,
     origin,
     createAccount,
+    billExportCount: billExportCount || 0,
   };
 }
 
