@@ -3,7 +3,7 @@ import bodyParser from "koa-bodyparser";
 import KoaStatic from "koa-static";
 import path from "path";
 import router from "./route/route.js";
-import { ifOvertime } from "./controller/index.js";
+import { ifOvertime, initDefaultRoles } from "./controller/index.js";
 import utils from "./utils/index.js";
 import imageManager from "./utils/imageManager.js";
 
@@ -60,7 +60,7 @@ app.use(async (ctx, next) => {
   const token = ctx.headers.zhtoken;
   if (
     ctx.url.indexOf("login") < 0 &&
-    ctx.url.indexOf("logout") &&
+    ctx.url.indexOf("logout") < 0 &&
     ctx.url.indexOf("/get/") < 0
   ) {
     if (await ifOvertime(token)) {
@@ -74,4 +74,12 @@ app.use(async (ctx, next) => {
 app.use(router);
 app.listen(8903);
 console.log("成功启动, 请求 http://localhost:8903");
+
+// 初始化内置角色
+initDefaultRoles().then(() => {
+  console.log("[init] 内置角色初始化完成");
+}).catch(err => {
+  console.error("[init] 内置角色初始化失败:", err);
+});
+
 imageManager.startScheduler();
